@@ -1,0 +1,3 @@
+Village map and collision data from nkokor/Pokemon-Village.
+https://github.com/nkokor/Pokemon-Village
+Map tiles credited upstream to LimeZu: https://limezu.itch.io/
