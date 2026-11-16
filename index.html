@@ -120,6 +120,7 @@ for(let i=0;i<260;i++){const tx=1+rnd()*58|0,ty=1+rnd()*32|0;if(TL[ty*MW+tx]==0)
 for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(TL[y*MW+x]==4)WT.push({x:x*16,y:y*16,k:x*7+y*13});
 const NPC=[{x:170,y:200,l:['HI! I MADE SNAKE.','FORK THE REPO, COPY TEMPLATE-GAME AND OPEN A PULL REQUEST!']},{x:470,y:312,l:['THE HUB LOADS EVERY FOLDER IN /GAMES AUTOMATICALLY.','NO CORE FILES TO EDIT, SO FEWER MERGE CONFLICTS!']},{x:700,y:190,l:['A GITHUB ACTION CHECKS YOUR MANIFEST.JSON ON EVERY PR.','A GREEN CHECK MEANS A REVIEWER CAN MERGE IT.']},{x:330,y:430,l:['WRITE A GOOD COMMIT MESSAGE. FUTURE YOU WILL THANK YOU.','ALSO ADD YOUR NAME TO THE CONTRIBUTORS WALL!']}];
 for(const n of NPC){n.c=rcfg();n.d=0;n.id=rnd()*9}
+const flowerColors = ['#f59abb', '#ffc85b', '#b9a0ed', '#fff0cb']
 const P={x:496,y:300,vx:0,vy:0,dir:0,fr:0,ft:0,lf:0};
 function solidT(x,y){const tx=x>>4,ty=y>>4;if(tx<0||ty<0||tx>=MW||ty>=MH)return true;const t=TL[ty*MW+tx];return t==4||t==5||t==7}
 function blocked(x,y){for(const[a,b]of[[x-4,y-4],[x+3,y-4],[x-4,y-1],[x+3,y-1]])if(solidT(a,b))return true;for(const o of OBS)if(x-4<o.x+o.w&&x+4>o.x&&y-4<o.y+o.h&&y>o.y)return true;for(const n of NPC)if(Math.abs(x-n.x)<8&&Math.abs(y-n.y)<5)return true;return false}
@@ -128,7 +129,7 @@ for(let i=0;i<500&&CO.length<14;i++){const x=24+rnd()*912|0,y=24+rnd()*496|0;if(
 const GR=document.createElement('canvas');GR.width=MW*16;GR.height=MH*16;const q=GR.getContext('2d'),MM=document.createElement('canvas');MM.width=MW;MM.height=MH;const mq=MM.getContext('2d');
 for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){const t=TL[ty*MW+tx],x=tx*16,y=ty*16,P_=(c,a,b,w,h)=>px(c,x+a,y+b,w,h,q);
  P_([K.g2,K.d2,K.s2,K.wd2,K.w2,K.g2,K.a2,K.s1][t],0,0,16,16);
- if(t==0||t==5){for(let i=0;i<7;i++)P_(rnd()<.5?K.g1:K.g3,rnd()*15|0,rnd()*15|0,1+(rnd()*2|0),1);if(t==0&&rnd()<.09){const fc=['#f4a8c8','#ffd45e','#f4ecd8','#c8a8f4'][rnd()*4|0],a=2+rnd()*11|0,b=2+rnd()*10|0;P_(fc,a,b,2,2);P_(K.g1,a,b+2,1,2)}}
+ if(t==0||t==5){for(let i=0;i<7;i++)P_(rnd()<.5?K.g1:K.g3,rnd()*15|0,rnd()*15|0,1+(rnd()*2|0),1);if(t==0&&rnd()<.09){rnd();rnd();rnd()}}
  if(t==1)for(let i=0;i<9;i++)P_(rnd()<.5?K.d1:K.d3,rnd()*15|0,rnd()*15|0,1+(rnd()*2|0),1);
  if(t==2){P_(K.s1,0,0,16,16);for(const a of[0,8])for(const b of[0,8]){const v=.9+rnd()*.2;P_(sh(K.s2,v),a+1,b+1,6,6);P_(K.s3,a+1,b+1,6,1);P_(K.s1,a+1,b+6,6,1)}}
  if(t==3){for(let r=0;r<4;r++){P_(sh(K.wd2,.92+rnd()*.16),0,r*4,16,3);P_(K.wd1,0,r*4+3,16,1);P_(K.wd3,0,r*4,16,1)}P_(K.wd1,2,1,1,1);P_(K.wd1,13,5,1,1)}
@@ -177,8 +178,11 @@ if(mv){P.dir=Math.abs(P.vx)>Math.abs(P.vy)?(P.vx>0?3:2):(P.vy>0?0:1);P.ft+=dt*(r
 function render(){if(village.active){drawVillage();return}const ox=Math.round(cam.x),oy=Math.round(cam.y),L=clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1),d=1-L;
  g.drawImage(GR,-ox,-oy);
  for(const w of WT){const x=w.x-ox,y=w.y-oy;if(x<-16||x>VW||y<-16||y>VH)continue;const s=Math.sin(T*2+w.k*.7);if(s>.55)px(K.w3,x+3+(w.k%5),y+5+(w.k%7),5,1);if(((w.k*31+Math.floor(T*3))%37)==0)px('#fff',x+(w.k%13)+1,y+(w.k%11)+2,1,1)}
- for(const f of TF){const x=f.x-ox,y=f.y-oy;if(x<-4||x>VW||y<-4||y>VH)continue;const s=Math.sin(T*2+f.p)*1.2;px(K.g3,x+s,y-3,1,2);px(K.g1,x,y-1,1,2);px(K.g3,x+s+2,y-2,1,1)}
  const it=[];
+ for(const f of TF){
+  if(f.x<ox-8||f.x>ox+VW+8||f.y<oy||f.y>oy+VH+12)continue;
+  it.push([f.y,()=>drawFlowers(f,ox,oy)]);
+ }
  for(const b of BD)it.push([b.by*16+64,()=>drawB(b,ox,oy)]);
  for(const t of TR)it.push([t.y,()=>drawTree(t,ox,oy)]);
  for(const l of LP)it.push([l.y,()=>{const x=l.x-ox,y=l.y-oy;g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x-3,y-1,8,3);px(K.ink,x-1,y-20,3,21);px(K.s2,x,y-20,1,20);px(K.ink,x-3,y-25,7,6);px(d>.3?'#ffe9a0':K.s3,x-2,y-24,5,4)}]);
@@ -206,11 +210,89 @@ function drawB(b,ox,oy){const x=b.bx*16-ox,y=b.by*16-oy;if(x<-90||x>VW+10||y<-70
  px(K.ink,x+7,y+6,66,13);px('#1c1830',x+8,y+7,64,11);const fl=Math.sin(T*37+b.bx)>-.93?1:.35;g.globalAlpha=fl;px(b.nc,x+8,y+7,64,1);px(b.nc,x+8,y+17,64,1);txt(b.name,x+40-tw(b.name)/2,y+10,b.nc);g.globalAlpha=1;
  px(K.ink,x+30,y+41,20,23);px(K.wd2,x+32,y+43,16,21);px(K.wd3,x+32,y+43,16,1);px(K.wd1,x+39,y+43,2,21);px(K.gold,x+44,y+54,2,2);px(K.s3,x+29,y+62,22,2);
  for(const wx of[x+5,x+55]){px(K.ink,wx-1,y+32,22,14);if(b.id=='wall'){px('#2a1040',wx,y+33,20,12);const i=wx<x+40?0:1;txt(NAMES[(Math.floor(T/1.6)+i*3)%NAMES.length],wx+10-tw(NAMES[(Math.floor(T/1.6)+i*3)%NAMES.length])/2,y+37,'#ff9af0')}else{px(d>.3?'#ffd878':'#6a7a9a',wx,y+33,20,12);px(K.ink,wx+9,y+33,2,12);px(K.ink,wx,y+38,20,1);px(d>.3?'#fff2b8':'#9ab0d0',wx,y+33,8,2)}px(K.wd1,wx-1,y+46,22,3);px(['#f4a8c8','#ffd45e','#c8a8f4'][(wx+b.bx)%3],wx+3,y+45,2,2);px(['#f4a8c8','#ffd45e','#c8a8f4'][(wx+b.bx+1)%3],wx+10,y+45,2,2);px(K.g2,wx+6,y+45,2,1)}}
-function drawTree(t,ox,oy){const x=t.x-ox,y=t.y-oy;if(x<-24||x>VW+24||y<-10||y>VH+40)return;const s=Math.sin(T*1.5+t.x)*1;g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x-9,y-2,19,5);px(K.ink,x-3,y-10,6,11);px(K.wd1,x-2,y-10,4,10);px(K.wd2,x-2,y-10,1,10);
- blob(x+s,y-22,11,K.ink);blob(x+s,y-22,10,sh(K.g1,t.v));blob(x+s-1,y-24,8,sh(K.g2,t.v));blob(x+s-3,y-28,4,sh(K.g3,t.v));px(K.g1,x+s+3,y-18,4,1)}
-function drawFo(ox,oy){const x=FO.x-ox,y=FO.y-oy;if(x<-40||x>VW+40||y<-40||y>VH+40)return;g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x-28,y-2,60,5);
- px(K.ink,x-29,y-17,58,19);px(K.s3,x-28,y-16,56,6);px(K.s2,x-28,y-10,56,10);px(K.s1,x-28,y-2,56,2);px(K.w2,x-24,y-14,48,9);px(K.w3,x-22+((T*10)%20),y-12,8,1);px(K.w3,x-10-((T*8)%12),y-9,6,1);
- px(K.ink,x-5,y-30,10,18);px(K.s2,x-4,y-29,8,16);px(K.s3,x-4,y-29,2,16);px(K.ink,x-10,y-31,20,5);px(K.s3,x-9,y-30,18,3);px(K.w3,x-6,y-33,12,2)}
+function windAt(x,y){
+ return Math.sin(T*2.35-x*.036-y*.016)*.7+Math.sin(T*1.1-x*.009)*.5;
+}
+function drawFlowers(f,ox,oy){
+ const x=Math.round(f.x-ox),y=Math.round(f.y-oy);
+ const sway=Math.round(windAt(f.x,f.y)*1.55);
+ const petal=flowerColors[Math.floor(f.p*3)%flowerColors.length];
+ for(const stem of [-3,0,4]){
+  const base=x+stem,top=base+sway,height=stem===0?8:5;
+  px('#396944',base,y-height+2,1,height-1);
+  px('#81ad61',base-2,y-3,2,1);
+  px('#56894c',base+1,y-5,2,1);
+  px('#54804d',Math.min(base,top),y-height+2,Math.abs(sway)+1,1);
+  px(petal,top-2,y-height,5,1);
+  px(petal,top-1,y-height-1,3,3);
+  px('#fff1b2',top,y-height,1,1);
+ }
+}
+function drawTree(t,ox,oy){
+ const x=t.x-ox,y=t.y-oy;
+ if(x<-26||x>VW+26||y<-10||y>VH+48)return;
+ const gust=windAt(t.x,t.y),bend=Math.round(gust*3);
+ const shade=sh('#214331',t.v),leaf=sh('#386a42',t.v);
+ const mid=sh('#548451',t.v),light=sh('#81a95d',t.v);
+ g.fillStyle='rgba(12,25,21,.28)';
+ g.beginPath();g.ellipse(x+2,y,15,4,0,0,Math.PI*2);g.fill();
+ px('#4c3831',x-3,y-14,6,15);px('#805840',x-2,y-14,4,13);
+ px('#ae7c50',x-1,y-12,1,9);
+ px('#634331',x-6,y-1,4,2);px('#634331',x+2,y-2,5,2);
+ px('#805840',x-5,y-15,4,5);px('#805840',x+2,y-18,5,5);
+ for(const [cx,cy,r] of [[-9,-19,8],[9,-19,8],[-6,-28,9],[7,-28,9],[0,-33,9],[0,-21,10]]){
+  const bx=x+cx+Math.round(bend*(-cy/33)),by=y+cy;
+  blob(bx,by,r+1,shade);
+  blob(bx,by-1,r,leaf);
+  blob(bx-2,by-3,r-3,mid);
+  px(light,bx-4,by-5,3,1);
+  px(mid,bx+3,by+1,3,1);
+  px(shade,bx+1,by+4,3,1);
+ }
+ for(let i=0;i<7;i++){
+  const lx=x-12+i*4+Math.round(bend*.8),ly=y-30+(i*11)%15;
+  px(i%3===0?light:mid,lx,ly,2,1);
+ }
+}
+function drawFo(ox,oy){
+ const x=FO.x-ox,y=FO.y-oy;
+ if(x<-46||x>VW+46||y<-12||y>VH+52)return;
+ const oval=(color,cx,cy,rx,ry)=>{
+  g.fillStyle=color;g.beginPath();g.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);g.fill();
+ };
+ oval('rgba(17,22,35,.35)',x+2,y+1,33,8);
+ oval('#333948',x,y-4,30,12);
+ oval('#717987',x,y-7,30,12);
+ for(let i=-24;i<=24;i+=6)px('#515b6d',x+i,y+1-Math.floor(i*i/150),1,4);
+ oval('#c8c0aa',x,y-11,30,11);
+ oval('#6f8290',x,y-11,27,9);
+ oval('#245c73',x,y-11,24,7);
+ oval('#3e9d9b',x,y-12,23,5);
+ for(let i=0;i<4;i++){
+  const phase=(T*.72+i*.25)%1;
+  g.strokeStyle=i%2?'#b2ecdc':'#6bccbf';
+  g.lineWidth=1;
+  g.beginPath();g.ellipse(x,y-10,3+phase*19,1+phase*4,0,0,Math.PI*2);g.stroke();
+ }
+ px('#394557',x-5,y-27,10,16);px('#929aa0',x-3,y-27,6,14);
+ px('#dbceae',x-2,y-25,2,11);
+ oval('#505b70',x,y-26,12,5);oval('#c8c0aa',x,y-29,12,4);
+ oval('#277b8b',x,y-29,9,2);
+ px('#a2d9cb',x-1,y-42,2,13);px('#e6fff0',x,y-45,1,10);
+ for(let side=-1;side<=1;side+=2){
+  for(let i=0;i<9;i++){
+   const phase=(T*1.8+i/9)%1;
+   const dx=side*(2+phase*20);
+   const dy=-34-35*phase+57*phase*phase;
+   px(i%3?'#9de5dc':'#eaffef',x+dx,y+dy,i%3?1:2,2);
+  }
+  for(const dx of [7,10]){
+   const phase=(T*3+dx*.13)%1;
+   px('#b6ebd9',x+side*dx,y-27+phase*13,1,3);
+  }
+ }
+ px('#e8dcc1',x-18,y-2,8,1);px('#e8dcc1',x+10,y-2,8,1);
+}
 function hud(ox,oy,d){box(4,4,54,15);px(K.ink,9,8,7,7);px(K.gold,10,9,5,5);px('#fff6b0',11,10,2,3);txt('X '+coins+'/'+CO.length,20,9,K.tx,1,1);
  box(VW-66,4,62,38);g.drawImage(MM,VW-65,5);px(K.ink,VW-66+((P.x/16)|0)+0,6+(P.y/16|0)-1,3,3);if(Math.floor(T*3)%2)px(K.red,VW-65+(P.x/16|0),5+(P.y/16|0),1,1);for(const b of BD)px(K.gold,VW-65+b.bx+2,5+b.by+3,2,2);
  txt(d>.55?'NIGHT':d>.3?'DUSK':'DAY',VW-64,44,K.tx,1,1);
