@@ -219,7 +219,7 @@ function hud(ox,oy,d){box(4,4,54,15);px(K.ink,9,8,7,7);px(K.gold,10,9,5,5);px('#
   wrap(b.desc,64).forEach((l,i)=>txt(l,36,90+i*8,K.tx));txt(b.seen?'E LOAD GAME   ESC CLOSE':'E PLAY +5 COINS   ESC CLOSE',36,136,K.gold)}
  if(ui&&ui.t=='dlg'){box(10,112,300,58);txt('NPC',20,118,K.gold);wrap(ui.o.l[ui.i],36).forEach((l,i)=>txt(l,20,130+i*10,K.tx,2));if(Math.floor(T*3)%2)txt('>',296,160,K.gold,2)}}
 let last=performance.now(),pf=0;
-function loop(t){const dt=Math.min(.05,(t-last)/1000);last=t;if(!paused||mode=='create')update(dt);else T+=0;render();
+function loop(t){const dt=clamp((t-last)/1000,0,.05);last=t;if(!paused||mode=='create')update(dt);else T+=0;render();
  if(!$('#cr').classList.contains('off')){pf+=dt;pg.fillStyle='#2a2545';pg.fillRect(0,0,88,40);[0,3,1,2].forEach((dr,i)=>drawChar(pg,11+22*i,36,dr,1+(Math.floor(pf*6)%4),cfg))}requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 </script></body></html>
