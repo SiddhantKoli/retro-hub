@@ -26,7 +26,7 @@ const servers = hosts.map((host) => {
     }
 
     const [filename, contentType] = file
-    const page = fs.readFileSync(path.join(__dirname, filename))
+    const page = fs.readFileSync(path.join(__dirname, 'public', filename))
     response.writeHead(200, {
       'Content-Type': contentType,
       'Content-Length': page.length
