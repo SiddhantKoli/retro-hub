@@ -21,12 +21,31 @@ input{font:inherit;background:#14101f;color:var(--ac);border:3px solid var(--lo)
 .bt{display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap}
 pre{background:#14101f;padding:8px;margin:8px 0;font-size:12px;overflow:auto;color:#9fe8b0}
 p{margin:6px 0;font-size:12px}
+
+[hidden]{display:none!important}
+button:disabled{opacity:.5;cursor:default}
+#room-panel{border-top:1px solid var(--hi);margin-top:14px;padding-top:12px}
+#room-panel h2{font-size:14px;color:var(--ac);margin:0 0 8px}
+#room-message,#room-roster{max-width:480px;line-height:1.5}
+#room-code{text-transform:uppercase;width:115px}
+#room-badge{position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:7px 10px;background:#211b34;border:2px solid #6d5fa8;color:#9fe8b0;pointer-events:none;z-index:4}
 </style></head><body>
+<div id="room-badge" hidden></div>
 <canvas id="g" width="320" height="180"></canvas>
 <div id="cr" class="ov"><div class="box"><h1>CREATE YOUR HERO</h1><canvas id="pv" width="88" height="40"></canvas>
 <div class="r"><b>Name</b><input id="nm" maxlength="10" value="HERO" aria-label="Hero name"></div><div id="opts"></div>
-<div class="bt"><button id="rb">Randomize</button><button id="go">Start ▸</button></div></div></div>
+<div class="bt"><button id="rb">Randomize</button><button id="go">Start ▸</button><button id="friends-start">Play with friends</button></div></div></div>
 <div id="mn" class="ov off"><div class="box"><h1>MENU</h1><div class="bt"><button id="m1">Resume</button><button id="m2">Customize hero</button><button id="m3">Sound: on</button><button id="m4">Skip time</button><button id="m5">Weather: auto</button><button id="village-go">Explore village</button></div>
+<section id="room-panel" aria-label="Multiplayer">
+<h2>Play with friends</h2>
+<p>Create a room for up to 8 players, or enter a friend's code.</p>
+<div class="bt"><button id="room-create">Create room</button>
+<label for="room-code">Room code <input id="room-code" maxlength="8" autocomplete="off" spellcheck="false" placeholder="8 characters"></label>
+<button id="room-join">Join room</button></div>
+<div class="bt"><button id="room-copy" hidden>Copy invite link</button><button id="room-leave" hidden>Leave room</button></div>
+<p id="room-message" role="status" aria-live="polite">Join the same website and room to explore together.</p>
+<p id="room-roster"></p>
+</section>
 <h1 style="margin-top:14px;font-size:13px">How to contribute a mini game</h1>
 <pre>/games
   /snake-by-rahul
@@ -190,6 +209,7 @@ function render(){if(village.active){drawVillage();return}if(scene!='town'){rend
  for(const c of CO)if(!c.got)it.push([c.y,()=>{const x=c.x-ox,y=c.y-oy,w=Math.abs(Math.cos(T*4+c.x))*5+1;g.fillStyle='rgba(0,0,0,.25)';g.fillRect(x-3,y,6,2);px(K.ink,x-w/2-1,y-9,w+2,8);px(K.gold,x-w/2,y-8,w,6);px('#fff6b0',x-w/2,y-8,Math.max(1,w/3|0),6)}]);
  for(const n of NPC)it.push([n.y,()=>drawChar(g,Math.round(n.x-ox),Math.round(n.y-oy),n.d,Math.floor(T*1.5+n.id)%2?2:0,n.c)]);
  it.push([P.y,()=>{drawChar(g,Math.round(P.x-ox),Math.round(P.y-oy),P.dir,P.fr,cfg);if(mode=='play')txt(cfg.name,P.x-ox-tw(cfg.name)/2,P.y-oy-38-(cfg.cap==3?7:0),K.tx,1,1)}]);
+ window.retroFriends?.addPlayers(it,'town',ox,oy);
  it.sort((a,b)=>a[0]-b[0]);for(const[,f]of it)f();
  for(const p of PT){g.globalAlpha=clamp(p.l/p.m,0,1);px(p.c,p.x-ox,p.y-oy,1,1)}g.globalAlpha=1;
  g.fillStyle='rgba(20,16,50,.13)';for(let i=0;i<4;i++){const x=((T*6+i*300)%1100)-100-ox,y=100+i*190-oy;g.beginPath();g.ellipse(x,y,70,22,0,0,6.3);g.fill()}
@@ -351,7 +371,7 @@ function renderIn(){g.fillStyle='#0b0816';g.fillRect(0,0,VW,VH);
   g.globalAlpha=Math.sin(T*31)>-.9?1:.4;txt('DOT ARCADE',RX+120-tw('DOT ARCADE',2)/2,RY+4,'#ff7ad8',2);g.globalAlpha=1;
   px('#b83a3a',RX+104,RY+152,32,8);px('#e85a5a',RX+104,RY+152,32,1);txt('EXIT',RX+120-tw('EXIT')/2,RY+154,K.tx);
   const it=[[64,()=>cab(100,64,'#3aa8c8',0)],[64,()=>cab(160,64,'#ff7ad8',1)],[64,()=>cab(220,64,'#e8a03a',0)],[CLK.y,()=>drawChar(g,CLK.x,CLK.y,0,Math.floor(T*1.5)%2?2:0,CLK.c)],[P.y,()=>{drawChar(g,Math.round(P.x),Math.round(P.y),P.dir,P.fr,cfg);txt(cfg.name,P.x-tw(cfg.name)/2,P.y-38-(cfg.cap==3?7:0),K.tx,1,1)}]];
-  it.sort((a,b)=>a[0]-b[0]);for(const[,f]of it)f();
+  window.retroFriends?.addPlayers(it,'inside',0,0);it.sort((a,b)=>a[0]-b[0]);for(const[,f]of it)f();
   g.globalCompositeOperation='multiply';g.fillStyle='rgb(225,210,240)';g.fillRect(0,0,VW,VH);g.globalCompositeOperation='lighter';
   [[100,'58,168,200'],[160,'255,122,216'],[220,'232,160,58']].forEach(([x,c],i)=>{const gr=g.createRadialGradient(x,50,0,x,50,46);gr.addColorStop(0,'rgba('+c+','+(.35+.1*Math.sin(T*8+i))+')');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-46,4,92,100)});g.globalCompositeOperation='source-over';
   g.fillStyle=VG;g.fillRect(0,0,VW,VH);hud(0,0,0)}
@@ -360,4 +380,4 @@ let last=performance.now(),pf=0;
 function loop(t){const dt=clamp((t-last)/1000,0,.05);last=t;if(!paused||mode=='create')update(dt);else T+=0;render();
  if(!$('#cr').classList.contains('off')){pf+=dt;pg.fillStyle='#2a2545';pg.fillRect(0,0,88,40);[0,3,1,2].forEach((dr,i)=>drawChar(pg,11+22*i,36,dr,1+(Math.floor(pf*6)%4),cfg))}requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
-</script></body></html>
+</script><script src="/multiplayer.js"></script></body></html>

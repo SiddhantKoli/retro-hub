@@ -42,7 +42,13 @@ function drawVillage() {
     txt('VILLAGE MAP LOADING', 10, 10, K.tx)
   } else {
     drawLayer(villageGround)
-    drawChar(g, Math.round(village.x) - x, Math.round(village.y) - y, village.direction, village.steps ? 1 + Math.floor(village.steps) % 4 : 0, cfg)
+    const players = []
+    window.retroFriends?.addPlayers(players, 'village', x, y)
+    players.push([village.y, () => {
+      drawChar(g, Math.round(village.x) - x, Math.round(village.y) - y, village.direction, village.steps ? 1 + Math.floor(village.steps) % 4 : 0, cfg)
+    }])
+    players.sort((a, b) => a[0] - b[0])
+    for (const [, draw] of players) draw()
     if (villageForeground.complete && villageForeground.naturalWidth) drawLayer(villageForeground)
   }
   box(5, VH - 19, 123, 14)
