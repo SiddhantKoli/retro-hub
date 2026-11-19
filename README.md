@@ -14,6 +14,8 @@ Install Node.js, then double-click `start-retro-hub.bat` on Windows or run `node
 - Esc to open the hub menu or return from the village
 - Choose **Explore village** from the hub menu to visit the imported map
 
+- Inside the arcade, press E at the middle cabinet to play Pong. Use W/S or the arrow keys to move, E or Space to serve, and Esc to exit.
+
 ## Project layout
 
 - `public/index.html` contains the hub, character creator, and game loop.
