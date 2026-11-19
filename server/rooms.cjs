@@ -134,7 +134,7 @@ function createRooms() {
     const token = randomBytes(24).toString('hex')
     const id = randomBytes(8).toString('hex')
     room.set(token, { id, seen: Date.now(), state })
-    reply(response, 200, { code, token, id })
+    reply(response, 200, { code, token, id, inviteBase: process.env.PUBLIC_URL || null })
     return true
   }
 }

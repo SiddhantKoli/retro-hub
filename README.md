@@ -37,6 +37,6 @@ Characters, names, movement, and current location are shared across the hub, arc
 
 ## Run the multiplayer server
 
-Use Node.js 20 or newer and run `node server.cjs`. The default address is `127.0.0.1:5500`. Hosting providers can set `PORT` and `HOST=0.0.0.0`. Run one server instance so all rooms share the same memory.
+Use Node.js 20 or newer and run `node server.cjs`. The default address is `127.0.0.1:5500`. Hosting providers can set `PORT` and `HOST=0.0.0.0`. Set `PUBLIC_URL` to the public HTTPS address so invites copied from localhost also work for friends. Run one server instance so all rooms share the same memory.
 
 Run connection checks with `node --test test/rooms.test.cjs`.

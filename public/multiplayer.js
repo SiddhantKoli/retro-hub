@@ -161,7 +161,7 @@
   }
   copyButton.onclick = async () => {
     if (!session) return
-    const url = new URL(location.href)
+    const url = new URL(session.inviteBase || location.href)
     url.searchParams.set('room', session.code)
     try {
       await navigator.clipboard.writeText(url.toString())
