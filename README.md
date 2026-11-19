@@ -40,3 +40,18 @@ Characters, names, movement, and current location are shared across the hub, arc
 Use Node.js 20 or newer and run `node server.cjs`. The default address is `127.0.0.1:5500`. Hosting providers can set `PORT` and `HOST=0.0.0.0`. Set `PUBLIC_URL` to the public HTTPS address so invites copied from localhost also work for friends. Run one server instance so all rooms share the same memory.
 
 Run connection checks with `node --test test/rooms.test.cjs`.
+
+## Asteroids observatory
+
+Walk southeast from the fountain to the **ASTEROIDS** house, just north of the racing track. Press **E** at the door, walk up to the central cabinet, and press **E** again.
+
+- **Space**, **Enter**, or **E** launches a round.
+- **A/D** or **Left/Right** rotates your ship.
+- **W** or **Up** adds thrust. Hold **Space** to fire.
+- **Esc** returns from the game to the observatory. Walk onto the red exit mat to return to town.
+
+Playing alone starts a solo flight. Friends in the same room can enter the cabinet to join the same cooperative round, with shared rocks, waves, and team score. Each pilot has their own ship, score, and three lives. Ships cannot damage each other. Surviving pilots can continue after a teammate runs out of lives. A new pilot may join a running mission. After the squad is defeated, pressing Space restarts together.
+
+Rocks split into smaller pieces, ships and shots wrap around the screen, and pilots receive a bonus life every 2,000 personal points (up to five lives). At mission end, each pilot earns one hub coin per 100 personal points, up to 50 coins per mission. The shared server controls multiplayer collisions and scoring.
+
+The supplied Claude prototype's building artwork is preserved in `public/games/asteroids/building.js`. The shared simulation is in `engine.js`, and the interior, controls, and presentation are in `scene.js`. Run all checks with `node --test test/*.test.cjs`.

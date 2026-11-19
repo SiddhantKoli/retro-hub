@@ -49,6 +49,25 @@ test('friends share positions while rooms and session tokens remain isolated', a
     assert.equal(hostile.status, 403)
     const large = await post('rooms', { state, extra: 'x'.repeat(5000) })
     assert.equal(large.status, 413)
+    const flightState = { ...state, x: 160, y: 90, scene: 'asteroids', asteroidsInput: { start: 0 } }
+    const flightRoom = (await post('rooms', { state: flightState })).body
+    const wingman = (await post('join', { code: flightRoom.code, state: flightState })).body
+    await post('sync', { ...wingman, state: flightState })
+    let flight = await post('sync', { ...flightRoom, state: flightState })
+    assert.equal(flight.body.asteroids.ships.length, 2)
+    await new Promise(resolve => setTimeout(resolve, 25))
+    flight = await post('sync', { ...flightRoom, state: { ...flightState, asteroidsInput: { start: 1, fire: true } } })
+    assert.equal(flight.body.asteroids.phase, 'play')
+    assert.equal(flight.body.asteroids.wave, 1)
+    assert.ok(flight.body.asteroids.bullets.length > 0)
+    const wingSnapshot = await post('sync', { ...wingman, state: flightState })
+    assert.equal(wingSnapshot.body.asteroids.round, flight.body.asteroids.round)
+    assert.equal(wingSnapshot.body.asteroids.ships.length, 2)
+    await post('leave', wingman)
+    flight = await post('sync', { ...flightRoom, state: flightState })
+    assert.equal(flight.body.asteroids.ships.length, 1)
+    assert.equal((await post('sync', { ...first, state })).body.asteroids, undefined)
+    await post('leave', flightRoom)
     const now = Date.now
     try {
       Date.now = () => now() + 31000

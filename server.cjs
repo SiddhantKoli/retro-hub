@@ -4,6 +4,9 @@ const path = require('node:path')
 const { createRooms } = require('./server/rooms.cjs')
 
 const files = new Map([
+  ['/games/asteroids/engine.js', ['games/asteroids/engine.js', 'text/javascript; charset=utf-8']],
+  ['/games/asteroids/building.js', ['games/asteroids/building.js', 'text/javascript; charset=utf-8']],
+  ['/games/asteroids/scene.js', ['games/asteroids/scene.js', 'text/javascript; charset=utf-8']],
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
   ['/multiplayer.js', ['multiplayer.js', 'text/javascript; charset=utf-8']],

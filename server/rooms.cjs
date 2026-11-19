@@ -1,8 +1,10 @@
 const { randomBytes } = require('node:crypto')
 
+const { createGame } = require('../public/games/asteroids/engine.js')
+
 const MAX_PLAYERS = 8
 const IDLE_MS = 30000
-const SCENES = new Set(['town', 'inside', 'pong', 'village'])
+const SCENES = new Set(['town', 'inside', 'pong', 'village', 'asteroids-lobby', 'asteroids'])
 const colors = ['skin', 'hairc', 'ccol', 'scol', 'pants', 'shoe']
 const styles = { hair: 3, cap: 4, shirt: 2, acc: 3 }
 
@@ -27,7 +29,41 @@ function cleanState(input) {
     if (!Number.isInteger(appearance[key]) || appearance[key] < 0 || appearance[key] > max) return null
     result.appearance[key] = appearance[key]
   }
+  if (input.scene === 'asteroids') {
+    const controls = input.asteroidsInput || {}
+    result.asteroidsInput = {
+      left: controls.left === true, right: controls.right === true,
+      thrust: controls.thrust === true, fire: controls.fire === true,
+      start: Number.isSafeInteger(controls.start) && controls.start >= 0 ? controls.start : 0
+    }
+  }
   return result
+}
+
+function advanceAsteroids(room) {
+  const active = [...room.values()].filter(player => player.state.scene === 'asteroids')
+  if (!active.length) { room.asteroids = null; return null }
+  if (!room.asteroids) {
+    room.asteroids = createGame()
+    room.lastAsteroidsTick = Date.now()
+  }
+  const game = room.asteroids
+  const ids = new Set(active.map(player => player.id))
+  for (const ship of game.snapshot().ships) {
+    if (!ids.has(ship.id)) game.removePlayer(ship.id)
+  }
+  for (const player of active) {
+    game.addPlayer(player.id, player.state.appearance.name)
+    game.setInput(player.id, Date.now() - player.seen < 1000 ? player.state.asteroidsInput : { start: player.state.asteroidsInput?.start || 0 })
+  }
+  let elapsed = Math.max(0, Math.min(.25, (Date.now() - room.lastAsteroidsTick) / 1000))
+  room.lastAsteroidsTick = Date.now()
+  while (elapsed > 0) {
+    const step = Math.min(1 / 60, elapsed)
+    game.step(step)
+    elapsed -= step
+  }
+  return game.snapshot()
 }
 
 function createRooms() {
@@ -94,6 +130,7 @@ function createRooms() {
       }
       if (pathname === '/api/leave') {
         room.delete(body.token)
+        advanceAsteroids(room)
         if (!room.size) rooms.delete(code)
         reply(response, 200, { ok: true })
         return true
@@ -105,8 +142,9 @@ function createRooms() {
       }
       player.state = state
       player.seen = Date.now()
+      const asteroids = advanceAsteroids(room)
       const players = [...room.values()].map(p => ({ id: p.id, ...p.state }))
-      reply(response, 200, { players })
+      reply(response, 200, { players, asteroids: player.state.scene === 'asteroids' ? asteroids : undefined })
       return true
     }
     const state = cleanState(body.state)

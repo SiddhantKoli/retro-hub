@@ -25,7 +25,8 @@
       direction: inVillage ? village.direction : P.dir,
       frame: inVillage ? (village.steps ? 1 + Math.floor(village.steps) % 4 : 0) : P.fr,
       scene: inVillage ? 'village' : scene,
-      appearance: { ...cfg }
+      appearance: { ...cfg },
+      asteroidsInput: scene === 'asteroids' ? AsteroidsGame.input() : undefined
     }
   }
 
@@ -96,6 +97,7 @@
     try {
       const result = await api('sync', { ...active, state: state() })
       if (currentGeneration !== generation) return
+      if (scene === 'asteroids') AsteroidsGame.receive(result.asteroids, active.id)
       const previous = new Map(peers.map(peer => [peer.id, peer]))
       const now = performance.now()
       peers = result.players.filter(player => player.id !== active.id).map(player => {
@@ -112,10 +114,11 @@
       })
       if (failures) message.textContent = 'Connected to room ' + active.code + '.'
       failures = 0
+      badge.hidden = scene === 'asteroids'
       badge.textContent = 'ROOM ' + active.code + ' · ' + result.players.length + '/8'
       roster.textContent = result.players.map(player =>
         player.appearance.name + (player.id === active.id ? ' (you)' : '') +
-        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', village: 'Village'}[player.scene])
+        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', 'asteroids-lobby': 'Observatory', asteroids: 'Flying Asteroids', village: 'Village'}[player.scene])
       ).join(' · ')
     } catch (error) {
       if (currentGeneration !== generation) return
@@ -132,6 +135,7 @@
   }
 
   window.retroFriends = {
+    isConnected() { return !!session },
     addPlayers(items, currentScene, ox, oy) {
       for (const peer of peers) {
         if (peer.scene !== currentScene) continue
