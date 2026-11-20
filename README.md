@@ -20,6 +20,7 @@ Install Node.js, then double-click `start-retro-hub.bat` on Windows or run `node
 
 - `public/index.html` contains the hub, character creator, and game loop.
 - `public/village/` contains the village controls, map layers, collision data, and credits.
+- `public/games/time-loop-heist/game.js` contains the Time Loop Heist bank building and co-op vault interior.
 - `server.cjs` serves the browser files on localhost.
 - `start-retro-hub.bat` starts the server on Windows.
 
@@ -33,7 +34,7 @@ Choose **Play with friends** on the character screen, then **Create room**. Copy
 
 Everyone must use the same server address. A localhost invite works only on the host computer. Internet players need the game's public HTTPS address, supplied by a hosting service or a temporary tunnel.
 
-Characters, names, movement, and current location are shared across the hub, arcade interior, and village. Each player keeps their own coins, weather, and Pong game. Rooms live in one server process and disappear when it restarts. Disconnected players expire after 30 seconds and can join again with the room code while others remain.
+Characters, names, movement, and current location are shared across the hub, arcade interior, village, and game interiors. Each player keeps their own coins, weather, and Pong game. Rooms live in one server process and disappear when it restarts. Disconnected players expire after 30 seconds and can join again with the room code while others remain.
 
 ## Run the multiplayer server
 
@@ -66,3 +67,7 @@ The checkered **KART CENTER** sits at the east end of the racing track. Enter th
 - Press **Esc** to return to the garage, then walk down to the exit mat to return to town.
 
 The building and complete kart circuit come from `Retro Hub_ Game Preview.html` and are integrated as `public/games/turbo-lap/game.js`.
+
+## Time Loop Heist
+
+The steel bank with the mint clock sign is the Time Loop Heist house. Walk to its front door, press **E**, then press **E** on its info card to enter the vault. In a room with a friend, each thief stands on a different colored plate; hold both to open the vault, then reach the matching blue or orange exit pad. The room sync shares positions, so both players see the same plate and vault state. Press **Esc** to return to town. Without a room, the interior is available as a solo preview.
