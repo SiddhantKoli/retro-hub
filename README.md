@@ -55,3 +55,14 @@ Playing alone starts a solo flight. Friends in the same room can enter the cabin
 Rocks split into smaller pieces, ships and shots wrap around the screen, and pilots receive a bonus life every 2,000 personal points (up to five lives). At mission end, each pilot earns one hub coin per 100 personal points, up to 50 coins per mission. The shared server controls multiplayer collisions and scoring.
 
 The supplied Claude prototype's building artwork is preserved in `public/games/asteroids/building.js`. The shared simulation is in `engine.js`, and the interior, controls, and presentation are in `scene.js`. Run all checks with `node --test test/*.test.cjs`.
+
+## Turbo Lap go-kart center
+
+The checkered **KART CENTER** sits at the east end of the racing track. Enter the garage, walk to the middle grid kart, and press **E** to open its indoor circuit.
+
+- **W/Up** accelerates; **S/Down** brakes and reverses.
+- **A/D** or **Left/Right** steers; **Space** drifts; **R** restarts a run.
+- Finish three laps to earn a medal and hub coins. Your best lap reappears as a ghost on future runs.
+- Press **Esc** to return to the garage, then walk down to the exit mat to return to town.
+
+The building and complete kart circuit come from `Retro Hub_ Game Preview.html` and are integrated as `public/games/turbo-lap/game.js`.

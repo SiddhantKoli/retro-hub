@@ -114,11 +114,11 @@
       })
       if (failures) message.textContent = 'Connected to room ' + active.code + '.'
       failures = 0
-      badge.hidden = scene === 'asteroids'
+      badge.hidden = scene === 'asteroids' || scene === 'turbo-lap'
       badge.textContent = 'ROOM ' + active.code + ' · ' + result.players.length + '/8'
       roster.textContent = result.players.map(player =>
         player.appearance.name + (player.id === active.id ? ' (you)' : '') +
-        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', 'asteroids-lobby': 'Observatory', asteroids: 'Flying Asteroids', village: 'Village'}[player.scene])
+        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', 'asteroids-lobby': 'Observatory', asteroids: 'Flying Asteroids', 'kart-lobby': 'Kart Center', 'turbo-lap': 'Racing karts', village: 'Village'}[player.scene])
       ).join(' · ')
     } catch (error) {
       if (currentGeneration !== generation) return
