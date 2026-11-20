@@ -479,7 +479,6 @@ function drawMapMark(b,left,top){
 }
 function hud(ox,oy,d){box(4,4,54,15);px(K.ink,9,8,7,7);px(K.gold,10,9,5,5);px('#fff6b0',11,10,2,3);txt('X '+coins+'/'+CO.length,20,9,K.tx,1,1);
  if(scene=='town'){box(VW-66,4,62,38);g.drawImage(MM,VW-65,5);for(const b of BD)drawMapMark(b,VW-65,5);px(K.ink,VW-66+((P.x/16)|0)+0,6+(P.y/16|0)-1,3,3);if(Math.floor(T*3)%2)px(K.red,VW-65+(P.x/16|0),5+(P.y/16|0),1,1);}
- if(scene==='town'&&!ui){const target=BD.find(b=>b.id==='time-loop-heist'),dx=target.bx*16+40-P.x,dy=target.by*16+68-P.y,way=Math.abs(dx)>Math.abs(dy)?(dx>0?'EAST':'WEST'):(dy>0?'SOUTH':'NORTH'),dist=Math.round(Math.hypot(dx,dy)/16);box(VW/2-66,3,132,16);txt('VAULT '+way+' '+dist+'T',VW/2-59,9,'#5affc8')}
  if(scene=='town')txt((d>.55?'NIGHT':d>.3?'DUSK':'DAY')+' '+W.s,VW-64,44,K.tx,1,1);
  const hint=scene=='town'?'WASD MOVE   SHIFT RUN   E TALK   ESC MENU':'WASD MOVE   E INTERACT   WALK TO MAT TO EXIT';txt(hint,VW/2-tw(hint)/2,VH-8,K.tx,1,1);
  if(banner){g.globalAlpha=clamp(banner.t,0,1);box(VW/2-tw(banner.s,2)/2-8,22,tw(banner.s,2)+16,20);txt(banner.s,VW/2-tw(banner.s,2)/2,28,K.gold,2,1);g.globalAlpha=1}
