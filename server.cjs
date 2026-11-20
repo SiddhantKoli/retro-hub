@@ -8,6 +8,7 @@ const files = new Map([
   ['/games/asteroids/building.js', ['games/asteroids/building.js', 'text/javascript; charset=utf-8']],
   ['/games/asteroids/scene.js', ['games/asteroids/scene.js', 'text/javascript; charset=utf-8']],
   ['/games/turbo-lap/game.js', ['games/turbo-lap/game.js', 'text/javascript; charset=utf-8']],
+  ['/games/time-loop-heist/game.js', ['games/time-loop-heist/game.js', 'text/javascript; charset=utf-8']],
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
   ['/multiplayer.js', ['multiplayer.js', 'text/javascript; charset=utf-8']],

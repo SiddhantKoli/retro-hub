@@ -24,7 +24,9 @@
       y: inVillage ? village.y : P.y,
       direction: inVillage ? village.direction : P.dir,
       frame: inVillage ? (village.steps ? 1 + Math.floor(village.steps) % 4 : 0) : P.fr,
-      scene: inVillage ? 'village' : scene,
+      // Keep the heist compatible with a room server that was already running
+      // before the new server-side scene allowlist was loaded.
+      scene: inVillage ? 'village' : scene === 'time-loop-heist' ? 'asteroids-lobby' : scene,
       appearance: { ...cfg },
       asteroidsInput: scene === 'asteroids' ? AsteroidsGame.input() : undefined
     }
@@ -118,7 +120,7 @@
       badge.textContent = 'ROOM ' + active.code + ' · ' + result.players.length + '/8'
       roster.textContent = result.players.map(player =>
         player.appearance.name + (player.id === active.id ? ' (you)' : '') +
-        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', 'asteroids-lobby': 'Observatory', asteroids: 'Flying Asteroids', 'kart-lobby': 'Kart Center', 'turbo-lap': 'Racing karts', village: 'Village'}[player.scene])
+        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', 'asteroids-lobby': 'Observatory', asteroids: 'Flying Asteroids', 'kart-lobby': 'Kart Center', 'turbo-lap': 'Racing karts', 'time-loop-heist': 'Time Loop Heist', village: 'Village'}[player.scene])
       ).join(' · ')
     } catch (error) {
       if (currentGeneration !== generation) return
@@ -136,6 +138,18 @@
 
   window.retroFriends = {
     isConnected() { return !!session },
+    localId() { return session?.id || 'local' },
+    getPlayers(currentScene) {
+      const roomScene = currentScene === 'time-loop-heist' ? 'asteroids-lobby' : currentScene
+      const now = performance.now()
+      return peers.filter(peer => peer.scene === roomScene).map(peer => {
+        const amount = Math.min(1, (now - peer.received) / 120)
+        peer.displayX = peer.fromX + (peer.x - peer.fromX) * amount
+        peer.displayY = peer.fromY + (peer.y - peer.fromY) * amount
+        return { id: peer.id, x: peer.displayX, y: peer.displayY,
+          name: peer.appearance.name, direction: peer.direction, frame: peer.frame }
+      })
+    },
     addPlayers(items, currentScene, ox, oy) {
       for (const peer of peers) {
         if (peer.scene !== currentScene) continue

@@ -4,7 +4,7 @@ const { createGame } = require('../public/games/asteroids/engine.js')
 
 const MAX_PLAYERS = 8
 const IDLE_MS = 30000
-const SCENES = new Set(['town', 'inside', 'pong', 'village', 'asteroids-lobby', 'asteroids', 'kart-lobby', 'turbo-lap'])
+const SCENES = new Set(['town', 'inside', 'pong', 'village', 'asteroids-lobby', 'asteroids', 'kart-lobby', 'turbo-lap', 'time-loop-heist'])
 const colors = ['skin', 'hairc', 'ccol', 'scol', 'pants', 'shoe']
 const styles = { hair: 3, cap: 4, shirt: 2, acc: 3 }
 
