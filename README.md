@@ -21,6 +21,7 @@ Install Node.js, then double-click `start-retro-hub.bat` on Windows or run `node
 - `public/index.html` contains the hub, character creator, and game loop.
 - `public/village/` contains the village controls, map layers, collision data, and credits.
 - `public/games/time-loop-heist/game.js` contains the Time Loop Heist bank building and co-op vault interior.
+- `public/games/pixel-garden/game.js` contains the Pixel Garden greenhouse and garden scene.
 - `server.cjs` serves the browser files on localhost.
 - `start-retro-hub.bat` starts the server on Windows.
 
@@ -67,6 +68,10 @@ The checkered **KART CENTER** sits at the east end of the racing track. Enter th
 - Press **Esc** to return to the garage, then walk down to the exit mat to return to town.
 
 The building and complete kart circuit come from `Retro Hub_ Game Preview.html` and are integrated as `public/games/turbo-lap/game.js`.
+
+## Pixel Garden
+
+Find the glass **PIXEL GARDEN** greenhouse between Contributors Wall and Memory Match. Enter it with **E**. Walk up to a planter and press **E** to plant a seed, water a growing sprout, or harvest a bloom for a coin. In a multiplayer room, all visitors tend the same four shared beds and can see each other in the greenhouse. Press **Esc** to leave.
 
 ## Time Loop Heist
 

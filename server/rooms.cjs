@@ -4,7 +4,7 @@ const { createGame } = require('../public/games/asteroids/engine.js')
 
 const MAX_PLAYERS = 8
 const IDLE_MS = 30000
-const SCENES = new Set(['town', 'inside', 'pong', 'village', 'asteroids-lobby', 'asteroids', 'kart-lobby', 'turbo-lap', 'time-loop-heist'])
+const SCENES = new Set(['town', 'inside', 'pong', 'village', 'asteroids-lobby', 'asteroids', 'kart-lobby', 'turbo-lap', 'time-loop-heist', 'pixel-garden'])
 const colors = ['skin', 'hairc', 'ccol', 'scol', 'pants', 'shoe']
 const styles = { hair: 3, cap: 4, shirt: 2, acc: 3 }
 
@@ -37,7 +37,35 @@ function cleanState(input) {
       start: Number.isSafeInteger(controls.start) && controls.start >= 0 ? controls.start : 0
     }
   }
+  if (input.scene === 'pixel-garden' && input.gardenAction && typeof input.gardenAction === 'object') {
+    const { seq, plot, kind, seed } = input.gardenAction
+    if (Number.isSafeInteger(seq) && seq > 0 && Number.isInteger(plot) && plot >= 0 && plot < 4 &&
+        ['plant', 'water', 'harvest'].includes(kind) && Number.isInteger(seed) && seed >= 0 && seed < 4) {
+      result.gardenAction = { seq, plot, kind, seed }
+    }
+  }
   return result
+}
+
+function syncGarden(room, player, action) {
+  room.garden ||= Array.from({ length: 4 }, () => ({ seed: -1, growAt: 0, watered: false }))
+  let reward = false, note = ''
+  if (action && player.state.scene === 'pixel-garden' && action.seq > (player.gardenSeq || 0)) {
+    player.gardenSeq = action.seq
+    const x = [54, 125, 196, 267][action.plot]
+    const closeEnough = Math.hypot(player.state.x - x, player.state.y - 108) < 25
+    if (closeEnough) {
+      const pot = room.garden[action.plot], now = Date.now()
+      if (action.kind === 'plant' && pot.seed < 0) { Object.assign(pot, { seed: action.seed, growAt: now + 9000, watered: false }); note = 'Seed planted! Give it a drink.' }
+      else if (action.kind === 'water' && pot.seed >= 0 && pot.growAt > now) { Object.assign(pot, { growAt: Math.max(now, pot.growAt - 3500), watered: true }); note = 'Watered! Everyone can see it grow.' }
+      else if (action.kind === 'harvest' && pot.seed >= 0 && pot.growAt <= now) {
+        Object.assign(pot, { seed: -1, growAt: 0, watered: false })
+        reward = true
+        note = 'Fresh bloom! +1 coin for you.'
+      } else note = 'That bed changed. Check it and try again.'
+    } else note = 'Stand beside the planter to tend it.'
+  }
+  return { garden: room.garden, gardenReward: reward, gardenAck: player.gardenSeq || 0, gardenNote: note }
 }
 
 function advanceAsteroids(room) {
@@ -143,8 +171,9 @@ function createRooms() {
       player.state = state
       player.seen = Date.now()
       const asteroids = advanceAsteroids(room)
+      const garden = syncGarden(room, player, state.gardenAction)
       const players = [...room.values()].map(p => ({ id: p.id, ...p.state }))
-      reply(response, 200, { players, asteroids: player.state.scene === 'asteroids' ? asteroids : undefined })
+      reply(response, 200, { players, asteroids: player.state.scene === 'asteroids' ? asteroids : undefined, garden: player.state.scene === 'pixel-garden' ? garden.garden : undefined, gardenReward: player.state.scene === 'pixel-garden' ? garden.gardenReward : undefined, gardenAck: player.state.scene === 'pixel-garden' ? garden.gardenAck : undefined, gardenNote: player.state.scene === 'pixel-garden' ? garden.gardenNote : undefined })
       return true
     }
     const state = cleanState(body.state)
@@ -159,6 +188,7 @@ function createRooms() {
       }
       do { code = randomBytes(4).toString('hex').toUpperCase() } while (rooms.has(code))
       room = new Map()
+      room.garden = Array.from({ length: 4 }, () => ({ seed: -1, growAt: 0, watered: false }))
       rooms.set(code, room)
     }
     if (!room) {

@@ -28,7 +28,8 @@
       // before the new server-side scene allowlist was loaded.
       scene: inVillage ? 'village' : scene === 'time-loop-heist' ? 'asteroids-lobby' : scene,
       appearance: { ...cfg },
-      asteroidsInput: scene === 'asteroids' ? AsteroidsGame.input() : undefined
+      asteroidsInput: scene === 'asteroids' ? AsteroidsGame.input() : undefined,
+      gardenAction: scene === 'pixel-garden' ? HubGames.find(game => game.manifest.id === 'pixel-garden-by-siddhant').Scene.networkState() : undefined
     }
   }
 
@@ -100,6 +101,7 @@
       const result = await api('sync', { ...active, state: state() })
       if (currentGeneration !== generation) return
       if (scene === 'asteroids') AsteroidsGame.receive(result.asteroids, active.id)
+      if (scene === 'pixel-garden') HubGames.find(game => game.manifest.id === 'pixel-garden-by-siddhant').Scene.receive(result.garden, result.gardenReward, result.gardenAck, result.gardenNote)
       const previous = new Map(peers.map(peer => [peer.id, peer]))
       const now = performance.now()
       peers = result.players.filter(player => player.id !== active.id).map(player => {
@@ -120,7 +122,7 @@
       badge.textContent = 'ROOM ' + active.code + ' · ' + result.players.length + '/8'
       roster.textContent = result.players.map(player =>
         player.appearance.name + (player.id === active.id ? ' (you)' : '') +
-        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', 'asteroids-lobby': 'Observatory', asteroids: 'Flying Asteroids', 'kart-lobby': 'Kart Center', 'turbo-lap': 'Racing karts', 'time-loop-heist': 'Time Loop Heist', village: 'Village'}[player.scene])
+        ' — ' + ({town: 'Hub', inside: 'Arcade', pong: 'Playing Pong', 'asteroids-lobby': 'Observatory', asteroids: 'Flying Asteroids', 'kart-lobby': 'Kart Center', 'turbo-lap': 'Racing karts', 'time-loop-heist': 'Time Loop Heist', 'pixel-garden': 'Pixel Garden', village: 'Village'}[player.scene])
       ).join(' · ')
     } catch (error) {
       if (currentGeneration !== generation) return
