@@ -57,6 +57,7 @@ button:disabled{opacity:.5;cursor:default}
 <script src="/games/asteroids/building.js"></script>
 <script src="/games/asteroids/scene.js"></script>
 <script src="/games/turbo-lap/game.js"></script>
+<script src="/games/pixel-garden/game.js"></script>
 <script>
 /*
  * TIME LOOP HEIST — a vault house and co-op mini game for Retro Hub.
@@ -272,6 +273,7 @@ const TL=new Uint8Array(MW*MH),BD=[
 {id:'asteroids',name:'ASTEROIDS',slug:'asteroids-by-siddhant',au:'siddhant-k',desc:'Shared space flight. Blast splitting asteroids with friends.',bx:38,by:20,wc:'#4a4a8a',rc:'#2a2a5a',nc:'#7affc8'},
 {id:'turbo-lap',name:'KART CENTER',slug:'turbo-lap-by-siddhant',au:'siddhant-k',desc:'Race three indoor laps, drift through corners, and chase your best time.',bx:53,by:20,wc:'#777f94',rc:'#2a2f3c',nc:'#ff9a3a'},
 {id:'time-loop-heist',name:'TIME LOOP HEIST',slug:'time-loop-heist-by-siddhant',au:'siddhant-k',desc:'Two thieves, one vault. Hold both plates, crack the vault, and escape together.',bx:47,by:20,wc:'#354354',rc:'#343d45',nc:'#5affc8'}];
+BD.push({id:'pixel-garden',name:'PIXEL GARDEN',slug:'pixel-garden-by-siddhant',au:'siddhant-k',desc:'Plant seeds, water them, and harvest a shared flower garden.',bx:25,by:4,wc:'#49685a',rc:'#497860',nc:'#9deac5'});
 const NAMES=['RAHUL','PRIYA','ARJUN','SNEHA','KABIR','MEERA','YOU?'];
 const ZN=[['PLAZA',25,10,36,21],['ARCADE STREET',1,1,28,12],['PUZZLE FOREST',32,1,59,15],['RACING TRACK',33,18,59,33],['LAKESIDE',1,19,19,33]];
 function fill(x0,y0,x1,y1,t){for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)TL[y*MW+x]=t}
@@ -329,12 +331,48 @@ $('#village-go').onclick=()=>{if(scene==='town'){village.active=true;setMenu(fal
 $('#m1').onclick=()=>setMenu(false);$('#m2').onclick=()=>{setMenu(false);paused=true;$('#cr').classList.remove('off')};
 $('#m3').onclick=e=>{mute=!mute;e.target.textContent='Sound: '+(mute?'off':'on')};$('#m4').onclick=()=>{T+=45;setMenu(false)};$('#m5').onclick=e=>{const o=['auto','clear','rain','storm','fog'],i=(o.indexOf(W.v||'auto')+1)%5;W.v=o[i];W.auto=i==0;if(i)W.s=o[i];e.target.textContent='Weather: '+o[i]};
 function nearest(){if(scene==='asteroids-lobby'){if(Math.hypot(P.x-160,P.y-84)<26)return{k:'asteroid-cab',x:160,y:46};return null}if(scene==='kart-lobby'){if(Math.hypot(P.x-160,P.y-110)<28)return{k:'kart-start',x:160,y:78};return null}if(scene=='inside'){if(Math.hypot(P.x-160,P.y-72)<24)return{k:'cab',x:160,y:46};if(Math.hypot(P.x-CLK.x,P.y-CLK.y)<22)return{k:'n',o:CLK,x:CLK.x,y:CLK.y-30};return null}let best=null,bd=22;for(const b of BD){const d=Math.hypot(P.x-(b.bx*16+40),P.y-(b.by*16+68));if(d<bd){bd=d;best={k:'b',o:b,x:b.bx*16+40,y:b.by*16+50}}}for(const n of NPC){const d=Math.hypot(P.x-n.x,P.y-n.y);if(d<bd){bd=d;best={k:'n',o:n,x:n.x,y:n.y-30}}}return best}
-addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;keys[e.code]=1;if(e.code.startsWith('Arrow')||e.code=='Space')e.preventDefault();if(e.repeat)return;if(village.active){if(e.code==='Escape')village.active=false;return}if(scene==='turbo-lap'){turboLap.Scene.key(e.code);return}if(scene==='asteroids'){AsteroidsGame.key(e.code);return}if(scene==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').Scene.key(e.code);return}if(scene=='pong'){if(['KeyE','Space','Enter'].includes(e.code))Pong.key();if(e.code=='Escape')go(()=>{scene='inside'});return}if(tr)return;
- if(e.code=='Escape'){if(ui)ui=null;else if(mode=='play'&&$('#cr').classList.contains('off'))setMenu(!paused);else if(mode=='play')$('#cr').classList.add('off')}
-  if(e.code=='KeyE'&&mode=='play'&&!paused){if(ui){if(ui.t=='card'){if(ui.b.id==='time-loop-heist'){const heist=HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant');go(()=>{SV={x:P.x,y:P.y};scene='time-loop-heist';nearT=null;heist.Scene.start({exit(){heist.Scene.end();scene='town';P.x=SV.x;P.y=SV.y;P.vx=P.vy=0;P.dir=0;$('#room-badge').hidden=!window.retroFriends?.isConnected();fade=1}})});ui=null}else if(!ui.b.seen){ui.b.seen=1;coins+=5;say('+5 COINS - DEMO PLAY!');beep(988,.12,'square',.05,1568)}else say('LOADS /GAMES/'+ui.b.slug+'/INDEX.JS');ui=null}else{ui.i++;beep(440,.04);if(ui.i>=ui.o.l.length)ui=null}}
-  else if(nearT){beep(660,.07,'square',.05,990);if(nearT.k==='kart-start')go(()=>startKartRace());else if(nearT.k==='asteroid-cab')go(()=>{scene='asteroids';nearT=null;AsteroidsGame.start()});else if(nearT.k==='b'&&nearT.o.id==='turbo-lap')go(()=>{SV={x:P.x,y:P.y};scene='kart-lobby';P.x=160;P.y=150;P.vx=P.vy=0;nearT=null;banner=null});else if(nearT.k==='b'&&nearT.o.id==='asteroids')go(()=>{SV={x:P.x,y:P.y};scene='asteroids-lobby';P.x=160;P.y=150;P.vx=P.vy=0;nearT=null;banner=null});else if(nearT.k=='cab')go(()=>{scene='pong';Pong.start()});else if(nearT.k=='b'&&nearT.o.id=='pong')go(()=>{SV={x:P.x,y:P.y};scene='inside';P.x=160;P.y=160;P.dir=1;banner={s:'DOT ARCADE',t:2.6}});else if(nearT.k=='b')ui={t:'card',b:nearT.o};else{const n=nearT.o;n.d=Math.abs(P.x-n.x)>Math.abs(P.y-n.y)?(P.x>n.x?3:2):(P.y>n.y?0:1);ui={t:'dlg',o:n,i:0}}}}});
-addEventListener('keyup',e=>keys[e.code]=0);addEventListener('blur',()=>{for(const k in keys)keys[k]=0});
-function update(dt){T+=dt;if(scene==='turbo-lap'){turboLap.Scene.update(dt,keys);return}if(scene==='asteroids'){AsteroidsGame.update(dt);return}if(scene==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').Scene.update(dt,keys);return}if(village.active){updateVillage(dt);return}weatherUp(dt);if(scene=='pong'&&!paused)Pong.update(dt);if((scene=='inside'||scene=='asteroids-lobby'||scene=='kart-lobby')&&!tr&&P.y>=164&&Math.abs(P.x-160)<18)go(()=>{scene='town';P.x=SV.x;P.y=SV.y;P.dir=0});
+addEventListener('keydown', e => {
+ if(e.target.tagName==='INPUT')return;
+ keys[e.code]=1;
+ if(e.code.startsWith('Arrow')||e.code==='Space')e.preventDefault();
+ if(e.repeat)return;
+ if(village.active){if(e.code==='Escape')village.active=false;return}
+ if(scene==='turbo-lap'){turboLap.Scene.key(e.code);return}
+ if(scene==='asteroids'){AsteroidsGame.key(e.code);return}
+ if(scene==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').Scene.key(e.code);return}
+ if(scene==='pixel-garden'){HubGames.find(x=>x.manifest.id==='pixel-garden-by-siddhant').Scene.key(e.code);return}
+ if(scene==='pong'){if(['KeyE','Space','Enter'].includes(e.code))Pong.key();if(e.code==='Escape')go(()=>{scene='inside'});return}
+ if(tr)return;
+ if(e.code==='Escape'){if(ui)ui=null;else if(mode==='play'&&$('#cr').classList.contains('off'))setMenu(!paused);else if(mode==='play')$('#cr').classList.add('off')}
+ if(e.code!=='KeyE'||mode!=='play'||paused)return;
+ if(ui){
+  if(ui.t==='dlg'){ui.i++;beep(440,.04);if(ui.i>=ui.o.l.length)ui=null;return}
+  const b=ui.b;
+  if(b.id==='pixel-garden'){
+   const garden=HubGames.find(x=>x.manifest.id==='pixel-garden-by-siddhant');
+   go(()=>{SV={x:P.x,y:P.y};scene='pixel-garden';nearT=null;garden.Scene.start({
+    exit(){garden.Scene.end();scene='town';P.x=SV.x;P.y=SV.y;P.vx=P.vy=0;P.dir=0;$('#room-badge').hidden=!window.retroFriends?.isConnected();fade=1},
+    reportScore(n){coins+=n},beep
+   })});ui=null;return
+  }
+  if(b.id==='time-loop-heist'){
+   const heist=HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant');
+   go(()=>{SV={x:P.x,y:P.y};scene='time-loop-heist';nearT=null;heist.Scene.start({exit(){heist.Scene.end();scene='town';P.x=SV.x;P.y=SV.y;P.vx=P.vy=0;P.dir=0;$('#room-badge').hidden=!window.retroFriends?.isConnected();fade=1}})});ui=null;return
+  }
+  if(!b.seen){b.seen=1;coins+=5;say('+5 COINS - DEMO PLAY!');beep(988,.12,'square',.05,1568)}else say('LOADS /GAMES/'+b.slug+'/INDEX.JS');ui=null;return
+ }
+ if(!nearT)return;
+ beep(660,.07,'square',.05,990);
+ if(nearT.k==='kart-start')go(()=>startKartRace());
+ else if(nearT.k==='asteroid-cab')go(()=>{scene='asteroids';nearT=null;AsteroidsGame.start()});
+ else if(nearT.k==='b'&&nearT.o.id==='turbo-lap')go(()=>{SV={x:P.x,y:P.y};scene='kart-lobby';P.x=160;P.y=150;P.vx=P.vy=0;nearT=null;banner=null});
+ else if(nearT.k==='b'&&nearT.o.id==='asteroids')go(()=>{SV={x:P.x,y:P.y};scene='asteroids-lobby';P.x=160;P.y=150;P.vx=P.vy=0;nearT=null;banner=null});
+ else if(nearT.k==='cab')go(()=>{scene='pong';Pong.start()});
+ else if(nearT.k==='b'&&nearT.o.id==='pong')go(()=>{SV={x:P.x,y:P.y};scene='inside';P.x=160;P.y=160;P.dir=1;banner={s:'DOT ARCADE',t:2.6}});
+ else if(nearT.k==='b')ui={t:'card',b:nearT.o};
+ else{const n=nearT.o;n.d=Math.abs(P.x-n.x)>Math.abs(P.y-n.y)?(P.x>n.x?3:2):(P.y>n.y?0:1);ui={t:'dlg',o:n,i:0}}
+});addEventListener('keyup',e=>keys[e.code]=0);addEventListener('blur',()=>{for(const k in keys)keys[k]=0});
+function update(dt){T+=dt;if(scene==='turbo-lap'){turboLap.Scene.update(dt,keys);return}if(scene==='asteroids'){AsteroidsGame.update(dt);return}if(scene==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').Scene.update(dt,keys);return}if(scene==='pixel-garden'){HubGames.find(x=>x.manifest.id==='pixel-garden-by-siddhant').Scene.update(dt,keys);return}if(village.active){updateVillage(dt);return}weatherUp(dt);if(scene=='pong'&&!paused)Pong.update(dt);if((scene=='inside'||scene=='asteroids-lobby'||scene=='kart-lobby')&&!tr&&P.y>=164&&Math.abs(P.x-160)<18)go(()=>{scene='town';P.x=SV.x;P.y=SV.y;P.dir=0});
  if(mode=='play'&&!paused&&!ui&&!tr&&scene!='pong'){let ax=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),ay=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0);const run=keys.ShiftLeft||keys.ShiftRight,sp=run?84:54;if(ax&&ay){ax*=.7071;ay*=.7071}
   P.vx+=(ax*sp-P.vx)*Math.min(1,dt*14);P.vy+=(ay*sp-P.vy)*Math.min(1,dt*14);let nx=P.x+P.vx*dt;if(!blocked(nx,P.y))P.x=nx;let ny=P.y+P.vy*dt;if(!blocked(P.x,ny))P.y=ny;
   const mv=Math.hypot(P.vx,P.vy)>10;if(mv){P.dir=Math.abs(P.vx)>Math.abs(P.vy)?(P.vx>0?3:2):(P.vy>0?0:1);P.ft+=dt*(run?11:8);P.fr=1+(Math.floor(P.ft)%4);if(Math.floor(P.ft)!=P.lf){P.lf=Math.floor(P.ft);spawn(P.x+rnd()*4-2,P.y-1,rnd()*6-3,-6-rnd()*4,.4,'#d8c8a0');if(P.lf%2==0)beep(80+rnd()*20,.04,'triangle',.06)}}else{P.fr=Math.floor(T*2)%2?2:0;P.ft=0}
@@ -347,7 +385,7 @@ function update(dt){T+=dt;if(scene==='turbo-lap'){turboLap.Scene.update(dt,keys)
  for(const l of LF){l.y+=l.v*dt;l.x+=Math.sin(T*2+l.p)*10*dt+5*dt;if(l.y>VH){l.y=-4;l.x=rnd()*VW}if(l.x>VW)l.x=0}
  if(toast&&(toast.t-=dt)<=0)toast=null;if(banner&&(banner.t-=dt)<=0)banner=null;if(tr){tr.t+=dt;fade=Math.min(1,tr.t*4);if(tr.t>=.25){const f=tr.fn;tr=null;f();cam.x=P.x-160;cam.y=P.y-98}}else if(fade>0)fade=Math.max(0,fade-dt*3);
  if(mode=='play'&&scene=='town'){const tx=P.x>>4,ty=P.y>>4;let z='';for(const[n,a,b,c,d]of ZN)if(tx>=a&&tx<=c&&ty>=b&&ty<=d){z=n;break}if(z&&z!=zone)banner={s:z,t:2.6};zone=z}}
-function render(){if(scene==='turbo-lap'){turboLap.Scene.draw(g);return}if(scene==='kart-lobby'){drawKartLobby();return}if(scene==='asteroids'){AsteroidsGame.draw();return}if(scene==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').Scene.draw(g);return}if(scene==='asteroids-lobby'){AsteroidsGame.drawInterior();return}if(village.active){drawVillage();return}if(scene!='town'){renderIn();return}const ox=Math.round(cam.x),oy=Math.round(cam.y),L=clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1),d=Math.min(1,1-L+WI*.35);
+function render(){if(scene==='turbo-lap'){turboLap.Scene.draw(g);return}if(scene==='kart-lobby'){drawKartLobby();return}if(scene==='asteroids'){AsteroidsGame.draw();return}if(scene==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').Scene.draw(g);return}if(scene==='pixel-garden'){HubGames.find(x=>x.manifest.id==='pixel-garden-by-siddhant').Scene.draw(g);return}if(scene==='asteroids-lobby'){AsteroidsGame.drawInterior();return}if(village.active){drawVillage();return}if(scene!='town'){renderIn();return}const ox=Math.round(cam.x),oy=Math.round(cam.y),L=clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1),d=Math.min(1,1-L+WI*.35);
  g.drawImage(GR,-ox,-oy);for(const r of RP){const a=1-r.t/.8,w=2+r.t*10;g.fillStyle='rgba(210,230,255,'+a*.8+')';g.fillRect(Math.round(r.x-ox-w/2),Math.round(r.y-oy),w,1);g.fillRect(Math.round(r.x-ox-w/2),Math.round(r.y-oy+2),w,1)}
  for(const w of WT){const x=w.x-ox,y=w.y-oy;if(x<-16||x>VW||y<-16||y>VH)continue;const s=Math.sin(T*2+w.k*.7);if(s>.55)px(K.w3,x+3+(w.k%5),y+5+(w.k%7),5,1);if(((w.k*31+Math.floor(T*3))%37)==0)px('#fff',x+(w.k%13)+1,y+(w.k%11)+2,1,1)}
  const it=[];
@@ -375,7 +413,7 @@ function render(){if(scene==='turbo-lap'){turboLap.Scene.draw(g);return}if(scene
  g.fillStyle=HZ;g.fillRect(0,0,VW,40);g.fillStyle=VG;g.fillRect(0,0,VW,VH);
  if(mode=='play')hud(ox,oy,d);
  if(fade>0){g.fillStyle='rgba(10,6,24,'+fade+')';g.fillRect(0,0,VW,VH)}}
-function drawB(b,ox,oy){if(b.id==='turbo-lap'){turboLap.building.draw(g,b.bx*16-ox,b.by*16-oy,T,1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1));return}if(b.id==='asteroids'){AsteroidsGame.building.draw(g,b.bx*16-ox,b.by*16-oy,T,1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1));return}if(b.id==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').building.draw(g,b.bx*16-ox,b.by*16-oy,T,1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1));return}const x=b.bx*16-ox,y=b.by*16-oy;if(x<-90||x>VW+10||y<-70||y>VH+70)return;const W=80,wc=b.wc,rc=b.rc,d=1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1);
+function drawB(b,ox,oy){if(b.id==='turbo-lap'){turboLap.building.draw(g,b.bx*16-ox,b.by*16-oy,T,1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1));return}if(b.id==='asteroids'){AsteroidsGame.building.draw(g,b.bx*16-ox,b.by*16-oy,T,1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1));return}if(b.id==='pixel-garden'){HubGames.find(x=>x.manifest.id==='pixel-garden-by-siddhant').building.draw(g,b.bx*16-ox,b.by*16-oy,T,1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1));return}if(b.id==='time-loop-heist'){HubGames.find(x=>x.manifest.id==='time-loop-heist-by-siddhant').building.draw(g,b.bx*16-ox,b.by*16-oy,T,1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1));return}const x=b.bx*16-ox,y=b.by*16-oy;if(x<-90||x>VW+10||y<-70||y>VH+70)return;const W=80,wc=b.wc,rc=b.rc,d=1-clamp(.5+.62*Math.cos(((T/150+.02)%1)*6.2832),0,1);
  g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x+3,y+60,W+4,7);
  px(K.ink,x-1,y+23,W+2,42);px(sh(wc,.72),x,y+24,W,40);px(wc,x+1,y+25,W-2,34);px(sh(wc,1.2),x+1,y+25,W-2,2);for(let i=8;i<W;i+=8)px(sh(wc,.88),x+i,y+28,1,30);
  px(K.s1,x,y+58,W,6);px(K.s2,x,y+58,W,2);
@@ -467,7 +505,7 @@ function drawFo(ox,oy){
  px('#e8dcc1',x-18,y-2,8,1);px('#e8dcc1',x+10,y-2,8,1);
 }
 function drawMapMark(b,left,top){
- const x=left+b.bx+1,y=top+b.by+2,kind=({pong:'pong',flappy:'bird',asteroids:'ship','turbo-lap':'kart','time-loop-heist':'clock'})[b.id];
+ const x=left+b.bx+1,y=top+b.by+2,kind=({pong:'pong',flappy:'bird',asteroids:'ship','turbo-lap':'kart','time-loop-heist':'clock','pixel-garden':'flower'})[b.id];
  if(!kind){px(K.gold,left+b.bx+2,top+b.by+3,2,2);return}
  px(K.ink,x,y,5,5);
  const p=(dx,dy,w=1,h=1,c)=>px(c,x+dx,y+dy,w,h);
@@ -475,7 +513,8 @@ function drawMapMark(b,left,top){
  else if(kind==='bird'){p(1,1,3,3,'#ffd45e');p(0,2,2,2,'#e88a3a');p(2,1,1,1,K.cream);p(4,2,1,1,'#ff9a5a');p(3,2,1,1,K.ink)}
  else if(kind==='ship'){p(2,0,1,1,'#f4ecd8');p(1,1,3,1,'#7affc8');p(0,2,5,1,'#7affc8');p(1,3,1,1,'#5ad8ff');p(3,3,1,1,'#5ad8ff')}
  else if(kind==='kart'){p(1,0,3,1,'#20232d');p(0,1,1,3,'#20232d');p(4,1,1,3,'#20232d');p(1,1,3,3,'#e85458');p(2,1,1,1,'#eaf3f0');p(2,3,1,1,'#ffd45e');p(1,4,1,1,'#20232d');p(3,4,1,1,'#20232d')}
- else {p(1,0,3,1,'#5affc8');p(0,1,1,3,'#5affc8');p(4,1,1,3,'#5affc8');p(1,4,3,1,'#5affc8');p(2,1,1,2,'#fff1bb');p(2,2,1,1,'#5affc8')}
+ else if(kind==='clock'){p(1,0,3,1,'#5affc8');p(0,1,1,3,'#5affc8');p(4,1,1,3,'#5affc8');p(1,4,3,1,'#5affc8');p(2,1,1,2,'#fff1bb');p(2,2,1,1,'#5affc8')}
+ else {p(2,0,1,2,'#73b96c');p(0,2,2,1,'#f184ae');p(4,2,1,1,'#ffd66d');p(2,3,1,2,'#d5bd78');p(1,1,1,1,'#f3ead0');p(3,1,1,1,'#9a9dff')}
 }
 function hud(ox,oy,d){box(4,4,54,15);px(K.ink,9,8,7,7);px(K.gold,10,9,5,5);px('#fff6b0',11,10,2,3);txt('X '+coins+'/'+CO.length,20,9,K.tx,1,1);
  if(scene=='town'){box(VW-66,4,62,38);g.drawImage(MM,VW-65,5);for(const b of BD)drawMapMark(b,VW-65,5);px(K.ink,VW-66+((P.x/16)|0)+0,6+(P.y/16|0)-1,3,3);if(Math.floor(T*3)%2)px(K.red,VW-65+(P.x/16|0),5+(P.y/16|0),1,1);}
@@ -486,7 +525,7 @@ function hud(ox,oy,d){box(4,4,54,15);px(K.ink,9,8,7,7);px(K.gold,10,9,5,5);px('#
  if(nearT&&!ui&&!paused){const x=nearT.x-ox,y=nearT.y-oy-5+Math.sin(T*6)*1.5;box(x-18,y-12,36,12);txt('PRESS E',x-13,y-8,K.gold)}
  if(ui&&ui.t=='card'){const b=ui.b;box(24,18,272,132);txt(b.name,36,28,b.nc,2,1);px(K.hi,34,42,252,1);txt('MANIFEST.JSON',36,48,'#7ad8ff');
   const wl=b.id=='wall'?['"ID": "contributors-wall"','"NAMES": '+NAMES.join(' ')]:['"ID": "'+b.slug+'"','"AUTHOR": "'+b.au+'"','"VERSION": "1.0.0"'];wl.forEach((l,i)=>txt(l,36,58+i*8,'#9fe8b0'));
-  wrap(b.desc,64).forEach((l,i)=>txt(l,36,90+i*8,K.tx));txt(b.id==='time-loop-heist'?'E ENTER HEIST   ESC CLOSE':b.seen?'E LOAD GAME   ESC CLOSE':'E PLAY +5 COINS   ESC CLOSE',36,136,K.gold)}
+  wrap(b.desc,64).forEach((l,i)=>txt(l,36,90+i*8,K.tx));txt(b.id==='pixel-garden'?'E ENTER GARDEN   ESC CLOSE':b.id==='time-loop-heist'?'E ENTER HEIST   ESC CLOSE':b.seen?'E LOAD GAME   ESC CLOSE':'E PLAY +5 COINS   ESC CLOSE',36,136,K.gold)}
  if(ui&&ui.t=='dlg'){box(10,112,300,58);txt('NPC',20,118,K.gold);wrap(ui.o.l[ui.i],36).forEach((l,i)=>txt(l,20,130+i*10,K.tx,2));if(Math.floor(T*3)%2)txt('>',296,160,K.gold,2)}}
 function go(fn){if(!tr)tr={fn,t:0}}
 function startKartRace(){
